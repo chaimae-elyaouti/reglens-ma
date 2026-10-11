@@ -4,11 +4,10 @@ Principe : **aucun chiffre n'est écrit à l'avance**. Tout sort de `eval/run_ev
 
 ## 1. Construire le jeu de questions (`eval/golden_set.jsonl`)
 
-Une ligne JSON par question :
+Une ligne JSON par question. Exemple de format (la référence juridique doit être vérifiée dans le PDF utilisé) :
 
 ```json
-{"id": "q-017", "question": "...", "lang": "fr", "answerable": true, "category": "licenciement",
- "gold": [{"doc_id": "code-travail", "article": "39"}], "notes": ""}
+{"id": "ex-001", "question": "Quelle est la durée normale du travail par semaine ?", "lang": "fr", "answerable": true, "category": "duree_travail", "gold": [{"doc_id": "code-travail-adala", "article": "184"}], "notes": "Exemple de format ; confirmer le gold dans la source utilisée."}
 ```
 
 - 60 questions : ~40 avec réponse, ~10 SANS réponse dans le corpus (impôts, droit pénal, autre pays...), ~10 en
@@ -18,7 +17,8 @@ Une ligne JSON par question :
 - Mélange formulations juridiques et langage courant (« virer » / « licencier »), et ajoute quelques questions en
   anglais ou en arabe si tu veux tester le multilingue.
 - Fais relire 10 questions par quelqu'un d'autre : c'est la meilleure défense contre ton propre biais.
-- Les 3 lignes de `golden_set.example.jsonl` sont des exemples de FORMAT : vérifie leurs articles dans ton PDF.
+- `eval/golden_set.example.jsonl` est un exemple de format, pas un benchmark validé. Vérifie les références dans
+  la source utilisée et remplace/complète les exemples avant d'interpréter les scores.
 
 ## 2. Métriques
 

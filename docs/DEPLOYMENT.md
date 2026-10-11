@@ -1,7 +1,7 @@
 # Déploiement
 
-Tout ce qui suit est à VÉRIFIER dans la documentation officielle au moment de déployer (offres gratuites,
-quotas et interfaces changent).
+Le projet n'a pas encore de déploiement public configuré. Les options ci-dessous sont des pistes ; avant d'en
+choisir une, vérifier sa documentation, ses tarifs, ses quotas et ses exigences actuelles.
 
 ## Principes valables partout
 - L'API est un conteneur (voir `Dockerfile`) ; l'index est copié dans l'image (lecture seule).
@@ -11,14 +11,14 @@ quotas et interfaces changent).
 - `/health` pour la supervision, `/version` pour savoir quel index tourne.
 - `LOG_QUESTIONS=false` en production (les questions peuvent contenir des informations personnelles).
 
-## Piste AWS (si ton compte est ouvert)
+## Option AWS
 Lambda en conteneur (image dans un registre AWS : vérifie le coût de stockage) + API Gateway ou Function URL ;
 frontend sur S3 + CloudFront ; logs dans CloudWatch (rétention courte) ; **AWS Budgets** avec alerte dès le premier jour.
 Points d'attention : le démarrage à froid charge le modèle d'embeddings (mesure-le) ; la mémoire allouée détermine la
 puissance CPU ; le disque est en lecture seule (c'est pourquoi l'index est un fichier numpy et non une base qui écrit).
 À éviter pour rester gratuit : OpenSearch Serverless, NAT Gateway, Aurora.
 
-## Piste sans AWS
+## Option sans AWS
 Backend sur un hébergeur de conteneurs à offre gratuite (par exemple Render : mise en veille après inactivité, d'où le
 message « le serveur se réveille » du frontend), frontend statique (GitHub Pages ou équivalent).
 Ajoute une vidéo démo au README : si le backend dort, la démo reste visible.

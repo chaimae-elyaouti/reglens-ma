@@ -1,28 +1,19 @@
 # Corpus : sources, version, et statut de la loi
 
-## V1 : Code du travail (loi n° 65-99)
+## Corpus indexé : Code du travail (loi n° 65-99)
 
-- Promulgué par le dahir n° 1-03-194 du 11 septembre 2003. La presse de l'époque indique 589 articles.
-  Le rapport qualité (`index/v1/quality.json`) compare le nombre d'articles trouvés à `expected_articles`.
-- Deux PDF candidats sont listés dans `data/sources.json` (portails justice.gov.ma). **Ils ont été trouvés par
-  recherche web mais pas téléchargés ni vérifiés par l'auteur de ce dépôt.** Compare-les (articles trouvés,
-  numéros manquants, qualité du texte) puis n'en active qu'un.
-- Renseigne `as_of` : la date de la version du texte (à lire dans le PDF / le Bulletin officiel). Elle est
-  affichée à l'utilisateur dans l'avertissement de chaque réponse.
+L'index local utilise le PDF du Code du travail référencé comme `code-travail-adala` dans `data/sources.json`.
+Le rapport qualité de l'index compare les articles extraits au nombre attendu (`expected_articles`).
 
-## ⚠️ La loi peut être en train de changer
+La date de la version juridique n'est pas renseignée (`as_of` est vide dans `data/sources.json`) et l'actualité du
+texte n'a pas été vérifiée à partir du Bulletin officiel. Les réponses affichent donc la version connue de l'index,
+mais le projet ne doit pas être présenté comme une source juridique à jour.
 
-Un article de presse spécialisé (wafir.ma, source secondaire, **non vérifiée**) indique qu'un projet de loi 03-26
-réformant le Code du travail aurait été adopté en Conseil des ministres le 14 mai 2026. **Vérifie sur des
-sources officielles** (Secrétariat général du gouvernement, Chambre des représentants, Bulletin officiel) où en est
-le texte : adopté ? publié ? en vigueur ? Conséquences pour le projet :
+Avant une mise à jour du corpus, vérifier le texte et sa date d'effet dans une source officielle. Pour conserver
+la traçabilité, ajouter une nouvelle version avec un `doc_id` distinct plutôt que remplacer silencieusement
+l'ancienne, puis reconstruire l'index et relancer l'évaluation.
 
-- chaque réponse affiche la version du texte indexé (`corpus_as_of`) ;
-- si une nouvelle version entre en vigueur, ajoute un NOUVEAU document (`doc_id` différent, ex. `code-travail-2026`)
-  avec sa date d'effet plutôt que d'écraser l'ancien, et décide quelle version interroger par défaut (filtre `doc_id`) ;
-- ne présente jamais l'outil comme à jour sans l'avoir vérifié.
-
-## Textes complémentaires possibles (V2, à vérifier avant d'ajouter)
+## Périmètre et extensions
 
 Le Code renvoie à des textes spéciaux (ex. article 4 : employés de maison, loi spéciale). Pour des questions
 réelles (accident du travail, harcèlement, sécurité sociale, travailleurs domestiques), il faudra probablement

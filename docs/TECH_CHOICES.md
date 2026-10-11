@@ -20,9 +20,10 @@ PyMuPDF suffit pour du texte natif. Si `quality.json` montre des articles manqua
 PDF est un scan, teste Docling/Unstructured/OCR sur 3 documents et compare le rapport qualité et le Hit@K. Documente
 le résultat même s'il est négatif.
 
-## À valider toi-même (non vérifié dans mon environnement)
+## Points de maintenance
 
-- Le nom exact et la disponibilité des modèles (`intfloat/multilingual-e5-small`, le cross-encoder multilingue, les
-  modèles Groq/Gemini) et des endpoints compatibles OpenAI : vérifie dans la doc de chaque fournisseur.
-- La limite de longueur du modèle d'embeddings : `build_index` te prévient si des chunks sont tronqués.
-- Les quotas des offres gratuites : ils changent souvent.
+- Les noms de modèles, endpoints et quotas des fournisseurs évoluent. Vérifier leur documentation avant toute
+  mise à jour de configuration ou de déploiement.
+- Le rapport de construction d'index signale les chunks tronqués par le modèle d'embeddings. Contrôler ce rapport
+  après chaque changement de modèle ou de corpus.
+- Le reranker reste optionnel. Le garder désactivé tant qu'une évaluation comparative ne montre pas un gain utile.

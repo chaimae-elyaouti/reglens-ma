@@ -36,7 +36,7 @@ python -m venv .venv
 pip install -e ".[ml,api,dev]"        # [ml] installe PyTorch : plusieurs centaines de Mo
 copy .env.example .env                 # puis renseigne GROQ_API_KEY / GEMINI_API_KEY
 
-pytest                                 # 41 tests, sans réseau, sans modèle
+pytest
 python scripts/fetch_corpus.py         # télécharge le PDF listé dans data/sources.json
 python -m reglens.ingestion.build_index
 type index\v1\quality.json             # LIS le rapport qualité avant de continuer
@@ -58,9 +58,35 @@ python eval/run_eval.py --sweep
 
 ## Résultats
 
-_À remplir avec tes mesures, jamais avec des chiffres supposés._ Colle ici `eval/results/latest.md`
-et ton analyse d'erreurs.
+### Mesures locales du 11 octobre 2026
+
+Résultats mesurés sur l'index `index/v1` (version `7851e0c804`), avec `intfloat/multilingual-e5-small`
+et le jeu local `eval/regression.jsonl` : **3 questions, toutes répondables**. Cet échantillon est trop
+petit et trop homogène pour représenter la qualité générale du système. Le jeu et les rapports JSON
+ne sont pas publiés dans ce dépôt.
+
+| Mode | Hit@1 | Hit@3 | Hit@5 | Recall@10 | MRR | Latence retrieval p50 / p95 (ms) |
+|---|---:|---:|---:|---:|---:|---:|
+| Dense | 0,667 | 1,000 | 1,000 | 0,574 | 0,833 | 45,2 / 60,1 |
+| BM25 | 0,000 | 1,000 | 1,000 | 0,648 | 0,444 | 36,8 / 40,7 |
+| Hybride | 0,667 | 0,667 | 1,000 | 0,694 | 0,750 | 42,8 / 46,5 |
+
+Essai de bout en bout sur les mêmes 3 questions, avec Groq `openai/gpt-oss-20b` : citations correctes
+pour les **2 réponses produites** (100 %), mais **1 abstention à tort sur 3 questions**. Les métriques
+d'abstention ne sont pas représentatives, car le jeu ne contient aucune question qui devrait être refusée.
+Latence totale p50 / p95 : **1 068,6 / 2 364,24 ms** ; moyenne : **1 935 tokens par question**.
+La fidélité des réponses n'a pas encore été évaluée manuellement.
+
+Tests : **43 passés** (`pytest -q`, 2,07 s). Mesure locale sans LLM ni reranker : démarrage **42,3 s**,
+RAM au repos **1 266 Mo**, pic **1 311 Mo** ; sur 10 requêtes retrieval, médiane **32 ms**, maximum
+**38 ms**. Ces temps dépendent de la machine et, pour le test bout en bout, du réseau et du fournisseur.
 
 ## Limites connues
 
-_À remplir honnêtement (corpus limité au Code du travail, pas de jurisprudence, version du texte, langues...)._
+- Le corpus évalué est limité à la version française du Code du travail (loi n° 65-99) ; il n'inclut pas
+  la jurisprudence ni l'ensemble des textes réglementaires auxquels le Code renvoie.
+- La date d'effet/version juridique du texte indexé n'est pas renseignée et son actualité n'a pas été
+  vérifiée. Ne pas utiliser l'outil comme source juridique à jour ni comme avis juridique.
+- Les résultats ci-dessus reposent sur 3 questions de régression locales seulement ; une question
+  répondable a provoqué une abstention. Aucun score de fidélité manuelle ni performance générale n'est
+  revendiqué.
