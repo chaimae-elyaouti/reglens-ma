@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reglens-ma"
+version = "0.1.0"
+description = "RegLens MA - recherche documentaire sur le droit du travail marocain (RAG avec citations, abstention et évaluation)"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "pydantic>=2.6",
+  "pydantic-settings>=2.2",
+  "rank-bm25>=0.2.2",
+  "pymupdf>=1.24",
+  "openai>=1.30",
+  "tenacity>=8.2",
+  "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+ml  = ["sentence-transformers>=3.0"]          # embeddings + reranker locaux (installe PyTorch)
+api = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
+dev = ["pytest>=8", "ruff>=0.4", "pip-audit"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

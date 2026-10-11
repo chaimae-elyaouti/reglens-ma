@@ -1,0 +1,27 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets : JAMAIS dans Git
+.env
+
+# Caches locaux
+.cache/
+
+# Données : les PDF bruts ne sont pas versionnés (voir data/sources.json + scripts/fetch_corpus.py)
+data/raw/*
+!data/raw/.gitkeep
+
+# Index générés (à versionner seulement après avoir vérifié la licence du corpus, voir docs/CORPUS.md)
+index/*
+!index/.gitkeep
+
+# Résultats d'évaluation : garde les tableaux finaux, ignore le bruit
+eval/results/*.json
+!eval/results/.gitkeep
+eval/faithfulness_*.csv

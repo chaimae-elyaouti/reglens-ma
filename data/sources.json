@@ -1,0 +1,27 @@
+{
+  "_comment": "Liste des documents du corpus. Vérifie chaque URL et la version du texte avant de lancer l'ingestion. 'as_of' = date de la version du texte (à lire dans le PDF / le Bulletin officiel).",
+  "documents": [
+    {
+      "doc_id": "code-travail",
+      "title": "Code du travail (loi n° 65-99)",
+      "lang": "fr",
+      "url": "https://cnclt.justice.gov.ma/wp-content/uploads/2023/06/Maroc-Code-travail-1.pdf",
+      "local_file": "code-travail.pdf",
+      "as_of": "",
+      "expected_articles": 589,
+      "enabled": false,
+      "notes": "URL trouvée par recherche web, non téléchargée ni vérifiée par l'auteur du dépôt. Vérifie que le PDF est le texte intégral (la presse indique 589 articles) : le rapport qualité te le dira."
+    },
+    {
+      "doc_id": "code-travail-adala",
+      "title": "Code du travail (loi n° 65-99), version Adala",
+      "lang": "fr",
+      "url": "https://adala.justice.gov.ma/api/uploads/2024/04/30/code%20du%20travail-1714463246806.pdf",
+      "local_file": "code-travail-adala.pdf",
+      "as_of": "",
+      "expected_articles": 589,
+      "enabled": true,
+      "notes": "Source alternative (portail juridique officiel Adala). Compare la qualité d'extraction avec la première, n'active PAS les deux en même temps (doublons)."
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RegLens MA — droit du travail marocain</title>
+<style>
+  :root {
+    --ink: #1d2733; --muted: #566475; --paper: #f4f6f8; --card: #ffffff; --rule: #d3dae2;
+    --cite: #0e6b63; --cite-bg: #e3f1ef; --warn: #8a4f00; --warn-bg: #fbf0dd;
+    --serif: Georgia, "Times New Roman", serif; --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e7ecf1; --muted: #9aa8b8; --paper: #12181f; --card: #1a222b; --rule: #2c3743;
+            --cite: #67cbc0; --cite-bg: #163230; --warn: #f0c070; --warn-bg: #2f2511; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--sans); }
+  main { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font: 600 1.9rem/1.2 var(--serif); margin: 0 0 .4rem; }
+  .lead { color: var(--muted); margin: 0 0 1.6rem; }
+  textarea { width: 100%; min-height: 6.5rem; padding: .85rem 1rem; font: inherit; color: inherit;
+             background: var(--card); border: 1px solid var(--rule); border-radius: 6px; resize: vertical; }
+  textarea:focus-visible, button:focus-visible { outline: 3px solid var(--cite); outline-offset: 2px; }
+  .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-top: .75rem; }
+  button.primary { background: var(--ink); color: var(--paper); border: 0; border-radius: 6px;
+                   padding: .65rem 1.2rem; font: 600 1rem var(--sans); cursor: pointer; }
+  button.primary:disabled { opacity: .55; cursor: wait; }
+  .examples { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .examples button { background: transparent; color: var(--ink); border: 1px solid var(--rule);
+                     border-radius: 999px; padding: .35rem .8rem; font: .9rem var(--sans); cursor: pointer; }
+  .examples button:hover { border-color: var(--cite); }
+  #status { color: var(--muted); font-size: .95rem; }
+  .notice { margin-top: 1.5rem; padding: .9rem 1rem; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
+  .answer { margin-top: 1.75rem; background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+            padding: 1.1rem 1.25rem; font: 1.05rem/1.65 var(--serif); white-space: pre-wrap; }
+  .answer .ref { font: 600 .8rem var(--sans); color: var(--cite); background: var(--cite-bg); border: 0;
+                 border-radius: 4px; padding: .05rem .35rem; margin: 0 .1rem; cursor: pointer; }
+  h2 { font: 600 1.15rem var(--sans); margin: 2rem 0 .6rem; }
+  details { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; margin-bottom: .5rem; }
+  details[open] { border-color: var(--cite); }
+  summary { cursor: pointer; padding: .7rem 1rem; display: flex; justify-content: space-between; gap: 1rem; }
+  summary .meta { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+  summary .cited { color: var(--cite); font-weight: 600; font-size: .85rem; }
+  .passage { padding: 0 1.1rem 1rem; font: 1rem/1.65 var(--serif); white-space: pre-wrap; }
+  .disclaimer { margin-top: 2rem; color: var(--muted); font-size: .88rem; }
+  .tech { margin-top: .5rem; color: var(--muted); font-size: .82rem; }
+  @media (prefers-reduced-motion: no-preference) { details[open] .passage { animation: open .15s ease-out; }
+    @keyframes open { from { opacity: 0; } to { opacity: 1; } } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Que dit le droit du travail marocain ?</h1>
+  <p class="lead">Décrivez votre situation. Chaque réponse cite les articles du Code du travail sur lesquels elle repose, et vous pouvez les relire.</p>
+
+  <label for="q" class="lead" style="display:block;margin-bottom:.4rem">Votre question</label>
+  <textarea id="q" maxlength="600" placeholder="Ex. : Mon employeur a mis fin à mon contrat sans préavis. Quels textes s'appliquent ?"></textarea>
+  <div class="row">
+    <button id="go" class="primary" type="button">Chercher dans les textes</button>
+    <span id="status" role="status" aria-live="polite"></span>
+  </div>
+  <div class="examples" id="examples"></div>
+
+  <div id="result" aria-live="polite"></div>
+  <p class="disclaimer" id="disclaimer">Outil de recherche documentaire, pas un avis juridique.</p>
+</main>
+
+<script>
+  // À changer au déploiement (URL de l'API). En local : uvicorn sur le port 8000.
+  const API_BASE = "http://localhost:8000";
+
+  const EXAMPLES = [
+    "Quelle est la durée normale du travail par semaine ?",
+    "Mon employeur peut-il me licencier sans préavis ?",
+    "Combien de jours de congé annuel ai-je après un an de travail ?",
+    "Quels sont les droits d'une salariée enceinte ?",
+  ];
+  const ABSTAIN = {
+    no_hits: "Aucun passage pertinent n'a été trouvé dans les textes indexés.",
+    low_evidence: "Les textes indexés ne contiennent pas d'élément assez proche de votre question.",
+    llm_abstained: "Les passages retrouvés ne suffisent pas pour répondre de façon fiable.",
+    ungrounded: "La réponse générée n'était pas appuyée sur les passages : elle n'est pas affichée.",
+    unparseable_output: "La réponse du modèle n'a pas pu être vérifiée. Réessayez.",
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, text = "") => Object.assign(document.createElement(tag), props, text ? { textContent: text } : {});
+
+  EXAMPLES.forEach((t) => {
+    const b = el("button", { type: "button" }, t);
+    b.onclick = () => { $("q").value = t; ask(); };
+    $("examples").append(b);
+  });
+  $("go").onclick = ask;
+
+  function renderAnswer(text, sources) {
+    const box = el("div", { className: "answer" });
+    text.split(/(\[Art\.?\s*\d+\])/i).forEach((part) => {
+      const m = part.match(/^\[Art\.?\s*(\d+)\]$/i);
+      if (!m) return box.append(document.createTextNode(part));
+      const b = el("button", { className: "ref", type: "button", title: "Voir l'article cité" }, part);
+      b.onclick = () => {
+        const d = document.querySelector(`[data-article="${m[1]}"]`);
+        if (d) { d.open = true; d.scrollIntoView({ block: "center" }); }
+      };
+      box.append(b);
+    });
+    return box;
+  }
+
+  function renderSources(sources, cited) {
+    const wrap = el("div");
+    wrap.append(el("h2", {}, "Passages consultés"));
+    sources.forEach((p) => {
+      const d = el("details", { id: "src-" + p.n });
+      d.dataset.article = p.article;
+      const s = el("summary");
+      const left = el("span", {}, `[${p.n}] Article ${p.article}` + (p.section_path ? ` — ${p.section_path}` : ""));
+      const right = el("span", { className: "meta" }, p.page ? `p. ${p.page} · ` : "");
+      right.append(el("span", cited.includes(p.article) ? { className: "cited" } : {}, cited.includes(p.article) ? "cité" : "non cité"));
+      s.append(left, right);
+      d.append(s, el("div", { className: "passage" }, p.text));
+      wrap.append(d);
+    });
+    return wrap;
+  }
+
+  async function ask() {
+    const question = $("q").value.trim();
+    if (question.length < 3) { $("status").textContent = "Écrivez une question d'au moins 3 caractères."; return; }
+    $("go").disabled = true; $("result").replaceChildren(); $("status").textContent = "Recherche en cours…";
+    const wake = setTimeout(() => { $("status").textContent = "Le serveur se réveille, cela peut prendre une demi-minute…"; }, 4000);
+    try {
+      const r = await fetch(API_BASE + "/ask", { method: "POST", headers: { "Content-Type": "application/json" },
+                                                 body: JSON.stringify({ question }) });
+      const data = await r.json();
+      if (r.status === 429) throw new Error("Limite quotidienne de questions atteinte. Revenez demain.");
+      if (r.status === 503) throw new Error("Le service de génération est momentanément indisponible. Réessayez plus tard.");
+      if (!r.ok) throw new Error(data.detail?.[0]?.msg || data.detail || "Une erreur est survenue.");
+      $("disclaimer").textContent = data.disclaimer || $("disclaimer").textContent;
+      const out = $("result");
+      if (data.abstain) out.append(el("div", { className: "notice" }, ABSTAIN[data.abstain_reason] || "Pas de réponse fiable."));
+      else out.append(renderAnswer(data.answer, data.sources));
+      if (data.sources.length) out.append(renderSources(data.sources, data.cited));
+      out.append(el("p", { className: "tech" }, `Index ${data.index_version} · ${Math.round(data.timings_ms.total)} ms`));
+      $("status").textContent = "";
+    } catch (e) {
+      $("status").textContent = "";
+      $("result").append(el("div", { className: "notice" }, e.message === "Failed to fetch" ? "Impossible de joindre le serveur." : e.message));
+    } finally { clearTimeout(wake); $("go").disabled = false; }
+  }
+</script>
+</body>
+</html>
