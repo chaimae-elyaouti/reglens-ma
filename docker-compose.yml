@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: reglens-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - INDEX_DIR=index/v1
+
+  frontend:
+    image: nginx:alpine
+    container_name: reglens-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - api

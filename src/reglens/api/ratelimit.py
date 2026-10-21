@@ -1,6 +1,6 @@
 """Limiteur de requêtes par IP et par jour, en mémoire.
 
-But : protéger TON quota LLM gratuit contre un script ou un curieux. Limite connue : l'état est local à
+But : protéger la quota LLM gratuit contre un script ou un curieux. Limite connue : l'état est local à
 UN processus. Sur Lambda (plusieurs instances) ou après un redémarrage, il est approximatif : pour un vrai
 plafond, on utiliserait API Gateway (usage plans) ou une table partagée (DynamoDB). À mentionner en entretien.
 """
